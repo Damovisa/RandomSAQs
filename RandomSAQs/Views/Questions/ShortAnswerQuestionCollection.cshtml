@@ -1,0 +1,47 @@
+﻿@inherits Nancy.ViewEngines.Razor.NancyRazorViewBase<RandomSAQs.Modules.ShortAnswerQuestionCollection>
+
+<div id="questions">
+    @foreach (var saq in Model)
+    {
+        <div>
+            <div class="row" data-id="@saq.Id">
+                <div class="col-sm-11">
+                    <p>
+                        @saq.QuestionText
+                    </p>
+                </div>
+                <div class="col-sm-1">
+                    <a href="#" class="btn btn-xs btn-danger" data-command="remove" title="This is a shit question, remove it please"><i class="glyphicon glyphicon-remove"></i></a>
+                    <a href="#" class="btn btn-xs btn-warning" data-command="swap" title="I don't like this question, can I have another?"><i class="glyphicon glyphicon-refresh"></i></a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(function() {
+            $("#questions").on("click", ".btn", function() {
+                var $t = $(this);
+                var $row = $t.parent().parent();
+                var $rowholder = $row.parent();
+                var command = $t.data("command");
+                var id = $row.data("id");
+                $rowholder.animate({opacity:0}, 400, function () {
+                    $.getJSON("/questions/1", null, function(data) {
+                        var newhtml = '<div class="row" data-id="' + data[0].id + '"><div class="col-sm-11"><p>' + data[0].questionText.replace(/(?:\r\n|\r|\n)/g, '<br />') + '</p></div><div class="col-sm-1"><a href="#" class="btn btn-xs btn-danger" data-command="remove" title="This is a shit question, remove it please"><i class="glyphicon glyphicon-remove"></i></a> <a href="#" class="btn btn-xs btn-warning" data-command="swap" title="I don\'t like this question, can I have another?"><i class="glyphicon glyphicon-refresh"></i></a></div></div>';
+                        $row.replaceWith(newhtml);
+                        $rowholder.animate({opacity:100}, 400);
+                    });
+                });
+                if (command === "remove") {
+                    // also post a remove request
+                    $.post("/question/report/" + id, null, function(data) {
+                        alert("This question has been removed: \n\n" + data.questionText);
+                    });
+                }
+            });
+        });
+    </script>
+}
