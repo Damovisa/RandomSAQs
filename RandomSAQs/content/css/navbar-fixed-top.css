@@ -2,3 +2,8 @@
   min-height: 2000px;
   padding-top: 80px;
 }
+@media print {
+  body {
+      min-height: 200px;
+  }
+}
